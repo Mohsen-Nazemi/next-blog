@@ -1,0 +1,87 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Post {
+  id            String    @id @default(uuid())
+  slug          String    @unique
+  title         String
+  content       String    // MDX content path
+  excerpt       String?
+  featuredImage String?
+  published     Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  author        User      @relation(fields: [authorId], references: [id])
+  authorId      String
+  category      Category? @relation(fields: [categoryId], references: [id])
+  categoryId    String?
+  seo          SEO?
+}
+
+model User {
+  id       String @id @default(uuid())
+  email    String @unique
+  name     String
+  password String
+  posts    Post[]
+  role     Role   @default(AUTHOR)
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?
+  posts       Post[]
+}
+
+model SEO {
+  id               String  @id @default(uuid())
+  title            String?
+  description      String?
+  robots           String?
+  canonical        String?
+  ogTitle          String?
+  ogDescription    String?
+  ogImage          String?
+  twitterTitle     String?
+  twitterDescription String?
+  twitterImage     String?
+  post             Post    @relation(fields: [postId], references: [id])
+  postId           String  @unique
+}
+
+model Settings {
+  id            String   @id @default(uuid())
+  siteName      String
+  siteUrl       String
+  description   String?
+  logo          String?
+  favicon       String?
+  // SEO Settings
+  defaultTitle       String?
+  defaultDescription String?
+  robotsTxt         String?
+  // Social Media
+  facebook      String?
+  twitter       String?
+  instagram     String?
+  // Custom URLs
+  postsPath     String   @default("posts")
+  categoriesPath String   @default("categories")
+  // Date & Time
+  timezone      String   @default("Asia/Tehran")
+  dateFormat    String   @default("DD MMMM YYYY")
+  updatedAt     DateTime @updatedAt
+}
+
+enum Role {
+  ADMIN
+  AUTHOR
+}
